@@ -3,25 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Message to My Moon</title>
+    <title>Stellar Transmission</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Dancing+Script:wght@500;700&family=Montserrat:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Dancing+Script:wght@400;700&family=Montserrat:wght@300;400;600&display=swap');
 
-        /* --- CORE LAYOUT --- */
+        /* --- CORE UNIVERSE --- */
         body, html {
             margin: 0; padding: 0; height: 100%; overflow: hidden;
             font-family: 'Montserrat', sans-serif;
-            background: #000000; cursor: none; /* Custom cursor */
+            background: #000000; cursor: none;
         }
 
-        /* --- LAYERS --- */
-        #background-aurora {
+        #deep-space {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 120%, #1b2735, #090a0f 80%, #000000 100%);
+            background: radial-gradient(circle at 50% 120%, #111a26, #050608 60%, #000000 100%);
             z-index: 0;
         }
-        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
         
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+
+        /* --- CUSTOM CURSOR --- */
+        .cursor-dot {
+            width: 6px; height: 6px; background: white; border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 9999;
+            box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.8);
+            transition: transform 0.1s;
+        }
+        .cursor-ring {
+            width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998;
+            transition: width 0.3s, height 0.3s, opacity 0.3s;
+            transform: translate(-50%, -50%);
+        }
+
         /* --- UI OVERLAYS --- */
         .overlay-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -29,159 +43,139 @@
             display: flex; justify-content: center; align-items: center;
             flex-direction: column;
             pointer-events: none; opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 1.5s ease;
         }
         .overlay-screen.active { opacity: 1; pointer-events: all; }
 
-        /* Hacker/Decoder Text Style */
-        .decoder-text {
-            font-family: 'Cinzel', serif; color: #a8c0ff; font-size: 2rem;
-            letter-spacing: 5px; text-transform: uppercase; text-align: center;
-            text-shadow: 0 0 15px rgba(168, 192, 255, 0.8);
-            min-height: 50px;
+        .cinematic-text {
+            font-family: 'Cinzel', serif; color: #a8c0ff; font-size: 1.8rem;
+            letter-spacing: 6px; text-transform: uppercase; text-align: center;
+            text-shadow: 0 0 20px rgba(168, 192, 255, 0.6);
+            margin-bottom: 20px;
         }
-        .click-hint {
-            font-family: 'Montserrat', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.4);
-            margin-top: 20px; letter-spacing: 3px; text-transform: uppercase;
-            animation: pulseText 2s infinite;
+        .pulse-hint {
+            font-size: 0.75rem; color: rgba(255,255,255,0.5); letter-spacing: 3px;
+            text-transform: uppercase; animation: fadePulse 3s infinite;
         }
-        @keyframes pulseText { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+        @keyframes fadePulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
 
-        /* --- MAIN SCENE --- */
-        #main-scene {
-            position: relative; width: 100%; height: 100%; z-index: 10;
-            opacity: 0; transition: opacity 2s ease;
-        }
-
-        /* --- THE MOON --- */
+        /* --- THE HEARTBEAT MOON --- */
         .moon-wrapper {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 150px; height: 150px; z-index: 2;
-            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            width: 140px; height: 140px; z-index: 5;
+            transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
-        .moon-wrapper.shifted { top: 12%; transform: translate(-50%, -50%) scale(0.6); }
+        .moon-wrapper.shifted { top: 15%; transform: translate(-50%, -50%) scale(0.6); }
 
         .moon {
             width: 100%; height: 100%; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #fff, #e6e6e6 30%, #8ca1bc 100%);
-            box-shadow: 0 0 50px rgba(255,255,255,0.2);
-            position: relative;
+            background: radial-gradient(circle at 35% 35%, #fff, #e6e6e6 20%, #8ca1bc 100%);
+            box-shadow: 0 0 40px rgba(255,255,255,0.15);
+            animation: heartbeat 4s infinite ease-in-out; /* Heartbeat Animation */
         }
-        /* Moon Glow Pulse */
-        .moon::after {
-            content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
-            border-radius: 50%; background: transparent;
-            box-shadow: 0 0 80px rgba(168, 192, 255, 0.4);
-            animation: moonPulse 4s ease-in-out infinite alternate;
+        @keyframes heartbeat {
+            0% { transform: scale(1); box-shadow: 0 0 40px rgba(255,255,255,0.15); }
+            50% { transform: scale(1.02); box-shadow: 0 0 60px rgba(255,255,255,0.3); }
+            100% { transform: scale(1); box-shadow: 0 0 40px rgba(255,255,255,0.15); }
         }
-        @keyframes moonPulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
 
         /* --- THE FLOATING ENVELOPE --- */
         .envelope-container {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 20; cursor: pointer;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        .envelope-container:hover { transform: translate(-50%, -55%) scale(1.1); }
-        .envelope-container.vanish { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        .envelope-container:hover { transform: translate(-50%, -55%) scale(1.05); }
+        .envelope-container:hover .envelope-body { box-shadow: 0 0 50px rgba(168, 192, 255, 0.3); }
+        .envelope-container.vanish { transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none;}
 
         .envelope-body {
-            width: 260px; height: 170px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(168, 192, 255, 0.5);
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(58, 123, 218, 0.15);
+            width: 240px; height: 160px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(168, 192, 255, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5);
             display: flex; justify-content: center; align-items: center;
-            position: relative; overflow: hidden;
+            overflow: hidden; position: relative;
+            transition: box-shadow 0.3s;
         }
-        .envelope-body::before {
+        /* Cosmic Shine Effect on Envelope */
+        .envelope-body::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg); animation: shimmer 3s infinite;
+            background: linear-gradient(60deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 4s infinite linear;
         }
-        @keyframes shimmer { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+        @keyframes shine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
         .wax-seal {
-            width: 50px; height: 50px; background: #e0c988; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            color: #574616; font-size: 24px; font-family: 'Cinzel', serif;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2;
+            z-index: 2; font-size: 2rem; color: #ffd700;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.4);
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
         }
 
-        /* --- THE LETTER CARD --- */
+        /* --- THE LETTER (GLASSMORPHISM) --- */
         .letter-view {
             position: absolute; z-index: 30; opacity: 0; pointer-events: none;
             left: 50%; top: 55%; transform: translate(-50%, -40%) scale(0.9);
             width: 90%; max-width: 550px;
-            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1);
         }
         .letter-view.active { opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1); }
-        
-        /* Implosion Animation */
-        .letter-view.implode { animation: implode 1.2s forwards ease-in-out; }
-        @keyframes implode {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            40% { transform: translate(-50%, -50%) scale(0.9); filter: brightness(0.5); }
-            50% { transform: translate(-50%, -50%) scale(0.01); opacity: 1; filter: brightness(5); }
-            55% { transform: translate(-50%, -50%) scale(0.01); opacity: 0; }
-            100% { opacity: 0; }
-        }
 
         .glass-panel {
-            background: rgba(18, 22, 33, 0.7);
-            backdrop-filter: blur(25px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(20, 25, 35, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px; padding: 40px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            color: white; display: flex; flex-direction: column;
-            max-height: 75vh;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+            color: #fff; display: flex; flex-direction: column;
+            max-height: 70vh; position: relative;
+        }
+        /* Subtle Noise Texture */
+        .glass-panel::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.05; z-index: -1; border-radius: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
         h1 {
-            font-family: 'Cinzel', serif; margin: 0 0 15px 0; font-size: 2rem;
-            background: linear-gradient(to right, #ffffff, #9fb6ff);
+            font-family: 'Cinzel', serif; margin: 0 0 20px 0; font-size: 1.8rem;
+            background: linear-gradient(to right, #fff, #a8c0ff);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-align: center;
+            text-align: center; letter-spacing: 2px;
         }
 
         .scroll-area {
-            flex-grow: 1; overflow-y: auto; padding-right: 10px;
-            margin-bottom: 20px; text-align: left;
+            flex-grow: 1; overflow-y: auto; padding-right: 15px; margin-bottom: 25px;
         }
-        /* Fancy Scrollbar */
-        .scroll-area::-webkit-scrollbar { width: 5px; }
-        .scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
-        .scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
         .letter-text {
-            font-family: 'Dancing Script', cursive; font-size: 1.5rem; line-height: 1.6;
+            font-family: 'Dancing Script', cursive; font-size: 1.4rem; line-height: 1.6;
             color: #dbe4eb; white-space: pre-wrap;
-        }
-
-        /* --- FOOTER UI --- */
-        .controls {
-            border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
         }
         
         .finish-btn {
-            background: transparent; border: 1px solid rgba(255,255,255,0.3);
-            color: white; padding: 12px 40px; border-radius: 50px;
-            font-family: 'Montserrat', sans-serif; letter-spacing: 2px;
-            font-size: 0.8rem; cursor: pointer; text-transform: uppercase;
-            transition: 0.4s; position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 14px 40px; border-radius: 50px;
+            font-family: 'Montserrat', sans-serif; letter-spacing: 2px; font-size: 0.8rem;
+            cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            margin-top: 20px; align-self: center;
         }
         .finish-btn:hover {
-            border-color: #a8c0ff; box-shadow: 0 0 20px rgba(168, 192, 255, 0.4);
-            background: rgba(168, 192, 255, 0.1);
+            background: white; color: black; box-shadow: 0 0 20px rgba(255,255,255,0.4);
         }
 
-        /* --- CUSTOM CURSOR --- */
-        .cursor-dot {
-            width: 8px; height: 8px; background: white; border-radius: 50%;
-            position: fixed; pointer-events: none; z-index: 9999;
-            box-shadow: 0 0 10px white;
+        /* --- EXPLOSION ANIMATION --- */
+        .implode { animation: implode 1.5s forwards ease-in-out; }
+        @keyframes implode {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.8; filter: brightness(0.8); }
+            50% { transform: translate(-50%, -50%) scale(0.01); opacity: 1; filter: brightness(3); background: white;}
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
         }
 
     </style>
@@ -192,16 +186,18 @@
         <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_51790407a5.mp3?filename=space-atmosphere-124379.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="background-aurora"></div>
+    <div id="deep-space"></div>
     <canvas id="starCanvas"></canvas>
     
-    <div class="cursor-dot" id="cursor"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
 
     <div id="intro" class="overlay-screen active">
-        <div class="decoder-text" id="introText"></div> <div class="click-hint" id="introSub">Click to Enter the Cosmos</div>
+        <div class="cinematic-text" id="introText"></div>
+        <div class="pulse-hint">Click to Align the Stars</div>
     </div>
 
-    <div id="main-scene">
+    <div id="main-scene" style="opacity:0; transition: opacity 2s;">
         
         <div class="moon-wrapper" id="moon">
             <div class="moon"></div>
@@ -209,7 +205,7 @@
 
         <div class="envelope-container" id="envelope" onclick="openEnvelope()">
             <div class="envelope-body">
-                <div class="wax-seal">★</div>
+                <div class="wax-seal">✦</div>
             </div>
         </div>
 
@@ -223,69 +219,51 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
 </div>
                 </div>
 
-                <div class="controls">
-                    <div style="width:100%; border-radius:12px; overflow:hidden;">
-                        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/2qxmye6gAegTMjLKEBoR3d?utm_source=generator" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                    </div>
-
-                    <button class="finish-btn" onclick="finishReading()">I Have Finished Reading</button>
+                <div style="width:100%; border-radius:12px; overflow:hidden; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/51lPx6Z6algW9mQ5v8mR8s?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 </div>
+
+                <button class="finish-btn" onclick="finishReading()">I Have Finished Reading</button>
             </div>
         </div>
     </div>
 
     <div id="outro" class="overlay-screen">
-        <div class="decoder-text" id="outroText"></div>
+        <div class="cinematic-text" id="outroText"></div>
     </div>
 
     <script>
-        /* --- CONFIG --- */
-        const starCount = 300;
-        const speedBase = 0.5; // Normal speed
-        const speedWarp = 40;  // Warp speed
+        /* --- CONFIGURATION --- */
+        const STAR_COUNT = 350;
+        const CONNECT_DISTANCE = 100; // Pixel distance to connect stars
         
-        /* --- ELEMENTS --- */
+        /* --- SETUP CANVAS & CONTEXT --- */
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d');
-        const cursor = document.getElementById('cursor');
-        
-        /* --- STATE --- */
         let width, height;
         let stars = [];
-        let mouse = { x: 0, y: 0 };
-        let currentSpeed = speedBase;
-        let isWarping = false;
+        let orbs = []; // "Wish Orbs" (Fireflies)
+        let mouse = { x: -999, y: -999 };
+        let isWarping = false; // Flag for warp speed animation
+
+        /* --- MOUSE TRACKING --- */
+        const cursorDot = document.getElementById('cursorDot');
+        const cursorRing = document.getElementById('cursorRing');
         
-        /* --- CURSOR TRAIL LOGIC --- */
-        let trail = [];
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
             
-            // Add stardust particle
-            trail.push({
-                x: mouse.x, y: mouse.y,
-                size: Math.random() * 3,
-                life: 1,
-                driftX: Math.random() * 2 - 1,
-                driftY: Math.random() * 2 - 1
-            });
+            // Smooth custom cursor
+            cursorDot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            // Add slight delay to ring for "drag" feel
+            setTimeout(() => {
+                 cursorRing.style.left = e.clientX + 'px';
+                 cursorRing.style.top = e.clientY + 'px';
+            }, 50);
         });
 
-        /* --- 3D STARFIELD SYSTEM --- */
-        function initStars() {
-            stars = [];
-            for(let i=0; i<starCount; i++) {
-                stars.push({
-                    x: Math.random() * width - width/2,
-                    y: Math.random() * height - height/2,
-                    z: Math.random() * width // Depth
-                });
-            }
-        }
-
+        /* --- RESIZE HANDLER --- */
         function resize() {
             width = window.innerWidth;
             height = window.innerHeight;
@@ -294,182 +272,226 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             initStars();
         }
         window.addEventListener('resize', resize);
-        resize();
 
-        function updateStars() {
-            // Background fill (clear with slight opacity for trail effect if needed, but here we clear fully)
-            ctx.fillStyle = "rgba(0,0,0,1)"; // Hard clear for sharpness
-            if (isWarping) ctx.fillStyle = "rgba(0,0,0,0.2)"; // Motion blur during warp
-            ctx.fillRect(0, 0, width, height);
+        /* --- STAR SYSTEM --- */
+        class Star {
+            constructor() {
+                this.reset();
+                // Random z to start to avoid "pop in"
+                this.z = Math.random() * width; 
+            }
+            reset() {
+                this.x = Math.random() * width - width/2;
+                this.y = Math.random() * height - height/2;
+                this.z = width; 
+                this.size = Math.random() * 2;
+                this.fill = Math.random() > 0.9 ? "#a8c0ff" : "#ffffff"; // Occasional blue tint
+            }
+            update(speed) {
+                this.z -= speed;
+                if (this.z <= 1) this.reset();
+            }
+            draw() {
+                // 3D Perspective Projection
+                let x = (this.x / this.z) * width/2 + width/2;
+                let y = (this.y / this.z) * height/2 + height/2;
+                let r = (1 - this.z / width) * 3 * this.size; // Size based on depth
 
-            // 1. Draw Stars
-            ctx.fillStyle = "white";
-            stars.forEach(star => {
-                // Move star closer
-                star.z -= currentSpeed;
-                
-                // Reset if passes screen
-                if (star.z <= 0) {
-                    star.z = width;
-                    star.x = Math.random() * width - width/2;
-                    star.y = Math.random() * height - height/2;
-                }
+                if (x < 0 || x > width || y < 0 || y > height) return;
 
-                // 3D Projection
-                const x = (star.x / star.z) * width/2 + width/2;
-                const y = (star.y / star.z) * height/2 + height/2;
-                const size = (1 - star.z / width) * 4; // Bigger when closer
-
-                if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                    if (isWarping) {
-                        // Draw lines for warp
-                        const prevZ = star.z + 40;
-                        const prevX = (star.x / prevZ) * width/2 + width/2;
-                        const prevY = (star.y / prevZ) * height/2 + height/2;
-                        
-                        ctx.strokeStyle = "rgba(168, 192, 255, 0.8)";
-                        ctx.lineWidth = size;
+                if (isWarping) {
+                    // Warp Line Effect
+                    let prevZ = this.z + 50;
+                    let prevX = (this.x / prevZ) * width/2 + width/2;
+                    let prevY = (this.y / prevZ) * height/2 + height/2;
+                    
+                    ctx.beginPath();
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                    ctx.lineWidth = r;
+                    ctx.moveTo(prevX, prevY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                } else {
+                    // Normal Star
+                    ctx.beginPath();
+                    ctx.fillStyle = this.fill;
+                    ctx.globalAlpha = (1 - this.z / width); // Fade in as it gets closer
+                    ctx.arc(x, y, r, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Constellation Connection (Mouse Interaction)
+                    let dx = x - mouse.x;
+                    let dy = y - mouse.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < CONNECT_DISTANCE) {
                         ctx.beginPath();
-                        ctx.moveTo(prevX, prevY);
-                        ctx.lineTo(x, y);
+                        ctx.strokeStyle = `rgba(168, 192, 255, ${1 - dist/CONNECT_DISTANCE})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(mouse.x, mouse.y);
                         ctx.stroke();
-                    } else {
-                        // Draw dots for normal
-                        const opacity = (1 - star.z / width);
-                        ctx.globalAlpha = opacity;
-                        ctx.beginPath();
-                        ctx.arc(x, y, size/2, 0, Math.PI*2);
-                        ctx.fill();
-                        ctx.globalAlpha = 1;
                     }
                 }
-            });
+            }
+        }
 
-            // 2. Draw Stardust Cursor Trail
-            trail.forEach((p, index) => {
-                p.life -= 0.02;
-                p.x += p.driftX;
-                p.y += p.driftY;
-                ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+        /* --- ORB SYSTEM (FIREFLIES) --- */
+        class Orb {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 100;
+                this.speed = Math.random() * 0.5 + 0.2;
+                this.radius = Math.random() * 2 + 1;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.y -= this.speed;
+                this.x += Math.sin(this.angle) * 0.5; // Gentle sway
+                this.angle += 0.02;
+                if (this.y < -50) this.y = height + 50;
+            }
+            draw() {
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(255, 223, 186, 0.6)"; // Warm glow
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fill();
+            }
+        }
+
+        /* --- INITIALIZATION --- */
+        function initStars() {
+            stars = [];
+            orbs = [];
+            for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
+            for (let i = 0; i < 30; i++) orbs.push(new Orb());
+        }
+        initStars();
+
+        /* --- ANIMATION LOOP --- */
+        let speed = 0.5;
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Warp Speed Logic
+            if (isWarping) {
+                if(speed < 40) speed += 0.5; // Accelerate
+            } else {
+                if(speed > 0.5) speed -= 1; // Decelerate
+                if(speed < 0.5) speed = 0.5;
+            }
+
+            // Draw Stars
+            stars.forEach(star => {
+                star.update(speed);
+                star.draw();
             });
-            trail = trail.filter(p => p.life > 0);
 
-            requestAnimationFrame(updateStars);
+            // Draw Orbs (Only when not warping)
+            if (!isWarping && speed < 2) {
+                orbs.forEach(orb => {
+                    orb.update();
+                    orb.draw();
+                });
+            }
+
+            requestAnimationFrame(animate);
         }
-        updateStars();
+        animate();
 
-        /* --- DECODER TEXT EFFECT --- */
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
-        function decodeText(element, targetText, speed=50) {
-            let iterations = 0;
-            const interval = setInterval(() => {
-                element.innerText = targetText.split("").map((letter, index) => {
-                    if(index < iterations) return targetText[index];
-                    return chars[Math.floor(Math.random() * chars.length)];
-                }).join("");
-                
-                if(iterations >= targetText.length) clearInterval(interval);
-                iterations += 1/3; // Speed of decoding
-            }, speed);
-        }
 
-        /* --- SCENE FLOW --- */
+        /* --- UI LOGIC & FLOW --- */
         const intro = document.getElementById('intro');
         const introText = document.getElementById('introText');
         const mainScene = document.getElementById('main-scene');
         const bgMusic = document.getElementById('bgMusic');
 
-        // Start Intro
-        setTimeout(() => {
-            decodeText(introText, "INCOMING TRANSMISSION...");
-        }, 500);
+        // Typewriter Effect for Headers
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        function scrambleText(element, finalString) {
+            let iterations = 0;
+            const interval = setInterval(() => {
+                element.innerText = finalString.split("").map((letter, index) => {
+                    if (index < iterations) return finalString[index];
+                    return chars[Math.floor(Math.random() * chars.length)];
+                }).join("");
+                if (iterations >= finalString.length) clearInterval(interval);
+                iterations += 1/3; 
+            }, 30);
+        }
 
-        // Click to Enter
+        // 1. Start Intro
+        setTimeout(() => { scrambleText(introText, "CONNECTING..."); }, 500);
+
         intro.addEventListener('click', () => {
             intro.style.opacity = 0;
-            setTimeout(() => { intro.style.display = 'none'; }, 1000);
+            setTimeout(() => { intro.style.display = 'none'; }, 1500);
             
-            // Play Audio
-            bgMusic.volume = 0.4;
-            bgMusic.play().catch(e => console.log("Audio requires interaction"));
-
+            // Try Audio Play
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(() => console.log("Audio requires interaction"));
+            
             mainScene.style.opacity = 1;
         });
 
-        /* --- ENVELOPE OPENING --- */
+        // 2. Open Letter Logic
         const envelope = document.getElementById('envelope');
         const moon = document.getElementById('moon');
         const letter = document.getElementById('letter');
-        const scrollContainer = document.getElementById('scrollContainer');
         const typingBody = document.getElementById('typingBody');
+        const scrollContainer = document.getElementById('scrollContainer');
 
-        // Prepare Typewriter
-        const fullText = typingBody.innerHTML;
-        typingBody.innerHTML = "";
+        // Prepare letter text
+        const rawText = typingBody.innerHTML;
+        typingBody.innerHTML = ""; // Clear for typing effect
 
         function openEnvelope() {
-            // 1. Warp Speed Effect
-            isWarping = true;
-            currentSpeed = speedWarp;
-            envelope.classList.add('vanish'); // Hide envelope
-            moon.classList.add('shifted');   // Move moon up
+            // Trigger Warp
+            isWarping = true; 
+            envelope.classList.add('vanish');
+            moon.classList.add('shifted');
 
-            // 2. Slow down after 1.5 seconds
             setTimeout(() => {
-                isWarping = false;
-                currentSpeed = speedBase;
-                
-                // 3. Show Letter
+                isWarping = false; // Stop Warp
                 letter.classList.add('active');
-                
-                // 4. Start Typing Effect (Fast)
+
+                // Type Letter
                 let i = 0;
-                const typing = setInterval(() => {
-                    // Check for <br>
-                    if(fullText.substring(i, i+4) === "<br>") {
+                let typing = setInterval(() => {
+                    if (rawText.substring(i, i+4) === "<br>") {
                         typingBody.innerHTML += "<br>";
-                        i+=4;
+                        i += 4;
                     } else {
-                        typingBody.innerHTML += fullText.charAt(i);
+                        typingBody.innerHTML += rawText.charAt(i);
                         i++;
                     }
-                    
-                    // Auto scroll
                     scrollContainer.scrollTop = scrollContainer.scrollHeight;
-
-                    if(i >= fullText.length) clearInterval(typing);
-                }, 5); // Fast typing
+                    if (i >= rawText.length) clearInterval(typing);
+                }, 15);
             }, 1200);
         }
 
-        /* --- FINISH READING (Supernova) --- */
+        // 3. Finish Reading
         const outro = document.getElementById('outro');
         const outroText = document.getElementById('outroText');
 
         function finishReading() {
-            // Implode Letter
-            letter.classList.add('implode');
+            letter.classList.add('implode'); // Supernova effect
             
-            // Flash Screen White
             setTimeout(() => {
+                // Flash White
                 document.body.style.transition = "background 0.1s";
                 document.body.style.background = "white";
-                mainScene.style.display = "none"; // Remove scene
-            }, 1000);
+                mainScene.style.display = 'none';
+            }, 1200);
 
-            // Fade to Black & Outro
             setTimeout(() => {
+                // Fade to Black
                 document.body.style.transition = "background 2s";
                 document.body.style.background = "black";
-                
                 outro.classList.add('active');
-                setTimeout(() => {
-                    decodeText(outroText, "UNTIL THE STARS BURN OUT");
-                }, 1000);
-            }, 1200);
+                setTimeout(() => { scrambleText(outroText, "YOU ARE MY FOREVER"); }, 1000);
+            }, 1500);
         }
 
     </script>
