@@ -59,7 +59,7 @@
         }
         @keyframes fadePulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
 
-        /* --- THE HEARTBEAT MOON --- */
+        /* --- THE HEARTBEAT MOON (Main Scene) --- */
         .moon-wrapper {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 140px; height: 140px; z-index: 5;
@@ -71,13 +71,52 @@
             width: 100%; height: 100%; border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #fff, #e6e6e6 20%, #8ca1bc 100%);
             box-shadow: 0 0 40px rgba(255,255,255,0.15);
-            animation: heartbeat 4s infinite ease-in-out; /* Heartbeat Animation */
+            animation: heartbeat 4s infinite ease-in-out; 
         }
         @keyframes heartbeat {
             0% { transform: scale(1); box-shadow: 0 0 40px rgba(255,255,255,0.15); }
             50% { transform: scale(1.02); box-shadow: 0 0 60px rgba(255,255,255,0.3); }
             100% { transform: scale(1); box-shadow: 0 0 40px rgba(255,255,255,0.15); }
         }
+
+        /* --- THE FINAL REALISTIC MOON (Outro) --- */
+        #final-scene {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 200; pointer-events: none; opacity: 0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #000; transition: opacity 2s ease;
+        }
+        
+        .final-moon {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fdfdfd, #c5c5c5 40%, #545454 100%);
+            box-shadow: 0 0 80px rgba(255, 255, 255, 0.15), inset -20px -20px 60px rgba(0,0,0,0.8);
+            transform: translateY(100px) scale(0.8);
+            opacity: 0;
+            transition: all 4s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+        /* Moon Texture (Craters) */
+        .final-moon::before {
+            content:''; position: absolute; top:0; left:0; width:100%; height:100%; border-radius:50%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.3'/%3E%3C/svg%3E");
+            opacity: 0.6; mix-blend-mode: multiply;
+        }
+        
+        .final-moon.rise {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            box-shadow: 0 0 100px rgba(255, 255, 255, 0.3), inset -10px -10px 40px rgba(0,0,0,0.5);
+        }
+
+        .final-quote {
+            font-family: 'Dancing Script', cursive; font-size: 1.5rem; color: #dbe4eb;
+            margin-top: 50px; opacity: 0; transform: translateY(20px);
+            text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            transition: all 2s ease; transition-delay: 2s; /* Wait for moon to rise */
+        }
+        .final-quote.show { opacity: 0.9; transform: translateY(0); }
+
 
         /* --- THE FLOATING ENVELOPE --- */
         .envelope-container {
@@ -100,7 +139,6 @@
             overflow: hidden; position: relative;
             transition: box-shadow 0.3s;
         }
-        /* Cosmic Shine Effect on Envelope */
         .envelope-body::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: linear-gradient(60deg, transparent, rgba(255,255,255,0.1), transparent);
@@ -133,7 +171,6 @@
             color: #fff; display: flex; flex-direction: column;
             max-height: 70vh; position: relative;
         }
-        /* Subtle Noise Texture */
         .glass-panel::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             opacity: 0.05; z-index: -1; border-radius: 20px;
@@ -228,23 +265,26 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         </div>
     </div>
 
-    <div id="outro" class="overlay-screen">
-        <div class="cinematic-text" id="outroText"></div>
+    <div id="final-scene">
+        <div class="final-moon" id="finalMoon"></div>
+        <div class="final-quote" id="finalQuote">
+            "No matter how far we are,<br>we look at the same moon."
+        </div>
     </div>
 
     <script>
         /* --- CONFIGURATION --- */
         const STAR_COUNT = 350;
-        const CONNECT_DISTANCE = 100; // Pixel distance to connect stars
+        const CONNECT_DISTANCE = 100;
         
-        /* --- SETUP CANVAS & CONTEXT --- */
+        /* --- SETUP CANVAS --- */
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
         let stars = [];
-        let orbs = []; // "Wish Orbs" (Fireflies)
+        let orbs = [];
         let mouse = { x: -999, y: -999 };
-        let isWarping = false; // Flag for warp speed animation
+        let isWarping = false;
 
         /* --- MOUSE TRACKING --- */
         const cursorDot = document.getElementById('cursorDot');
@@ -253,10 +293,7 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            
-            // Smooth custom cursor
             cursorDot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-            // Add slight delay to ring for "drag" feel
             setTimeout(() => {
                  cursorRing.style.left = e.clientX + 'px';
                  cursorRing.style.top = e.clientY + 'px';
@@ -277,7 +314,6 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         class Star {
             constructor() {
                 this.reset();
-                // Random z to start to avoid "pop in"
                 this.z = Math.random() * width; 
             }
             reset() {
@@ -285,26 +321,23 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
                 this.y = Math.random() * height - height/2;
                 this.z = width; 
                 this.size = Math.random() * 2;
-                this.fill = Math.random() > 0.9 ? "#a8c0ff" : "#ffffff"; // Occasional blue tint
+                this.fill = Math.random() > 0.9 ? "#a8c0ff" : "#ffffff";
             }
             update(speed) {
                 this.z -= speed;
                 if (this.z <= 1) this.reset();
             }
             draw() {
-                // 3D Perspective Projection
                 let x = (this.x / this.z) * width/2 + width/2;
                 let y = (this.y / this.z) * height/2 + height/2;
-                let r = (1 - this.z / width) * 3 * this.size; // Size based on depth
+                let r = (1 - this.z / width) * 3 * this.size;
 
                 if (x < 0 || x > width || y < 0 || y > height) return;
 
                 if (isWarping) {
-                    // Warp Line Effect
                     let prevZ = this.z + 50;
                     let prevX = (this.x / prevZ) * width/2 + width/2;
                     let prevY = (this.y / prevZ) * height/2 + height/2;
-                    
                     ctx.beginPath();
                     ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
                     ctx.lineWidth = r;
@@ -312,18 +345,15 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
                     ctx.lineTo(x, y);
                     ctx.stroke();
                 } else {
-                    // Normal Star
                     ctx.beginPath();
                     ctx.fillStyle = this.fill;
-                    ctx.globalAlpha = (1 - this.z / width); // Fade in as it gets closer
+                    ctx.globalAlpha = (1 - this.z / width);
                     ctx.arc(x, y, r, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Constellation Connection (Mouse Interaction)
                     let dx = x - mouse.x;
                     let dy = y - mouse.y;
                     let dist = Math.sqrt(dx*dx + dy*dy);
-                    
                     if (dist < CONNECT_DISTANCE) {
                         ctx.beginPath();
                         ctx.strokeStyle = `rgba(168, 192, 255, ${1 - dist/CONNECT_DISTANCE})`;
@@ -336,7 +366,7 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             }
         }
 
-        /* --- ORB SYSTEM (FIREFLIES) --- */
+        /* --- ORB SYSTEM --- */
         class Orb {
             constructor() {
                 this.x = Math.random() * width;
@@ -347,22 +377,20 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             }
             update() {
                 this.y -= this.speed;
-                this.x += Math.sin(this.angle) * 0.5; // Gentle sway
+                this.x += Math.sin(this.angle) * 0.5;
                 this.angle += 0.02;
                 if (this.y < -50) this.y = height + 50;
             }
             draw() {
                 ctx.beginPath();
-                ctx.fillStyle = "rgba(255, 223, 186, 0.6)"; // Warm glow
+                ctx.fillStyle = "rgba(255, 223, 186, 0.6)";
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
-        /* --- INITIALIZATION --- */
         function initStars() {
-            stars = [];
-            orbs = [];
+            stars = []; orbs = [];
             for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
             for (let i = 0; i < 30; i++) orbs.push(new Orb());
         }
@@ -373,40 +401,28 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         function animate() {
             ctx.clearRect(0, 0, width, height);
             
-            // Warp Speed Logic
             if (isWarping) {
-                if(speed < 40) speed += 0.5; // Accelerate
+                if(speed < 40) speed += 0.5;
             } else {
-                if(speed > 0.5) speed -= 1; // Decelerate
+                if(speed > 0.5) speed -= 1;
                 if(speed < 0.5) speed = 0.5;
             }
 
-            // Draw Stars
-            stars.forEach(star => {
-                star.update(speed);
-                star.draw();
-            });
-
-            // Draw Orbs (Only when not warping)
+            stars.forEach(star => { star.update(speed); star.draw(); });
             if (!isWarping && speed < 2) {
-                orbs.forEach(orb => {
-                    orb.update();
-                    orb.draw();
-                });
+                orbs.forEach(orb => { orb.update(); orb.draw(); });
             }
-
             requestAnimationFrame(animate);
         }
         animate();
 
 
-        /* --- UI LOGIC & FLOW --- */
+        /* --- UI LOGIC --- */
         const intro = document.getElementById('intro');
         const introText = document.getElementById('introText');
         const mainScene = document.getElementById('main-scene');
         const bgMusic = document.getElementById('bgMusic');
 
-        // Typewriter Effect for Headers
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         function scrambleText(element, finalString) {
             let iterations = 0;
@@ -420,42 +436,35 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             }, 30);
         }
 
-        // 1. Start Intro
         setTimeout(() => { scrambleText(introText, "CONNECTING..."); }, 500);
 
         intro.addEventListener('click', () => {
             intro.style.opacity = 0;
             setTimeout(() => { intro.style.display = 'none'; }, 1500);
-            
-            // Try Audio Play
             bgMusic.volume = 0.3;
             bgMusic.play().catch(() => console.log("Audio requires interaction"));
-            
             mainScene.style.opacity = 1;
         });
 
-        // 2. Open Letter Logic
+        // Letter Logic
         const envelope = document.getElementById('envelope');
         const moon = document.getElementById('moon');
         const letter = document.getElementById('letter');
         const typingBody = document.getElementById('typingBody');
         const scrollContainer = document.getElementById('scrollContainer');
 
-        // Prepare letter text
         const rawText = typingBody.innerHTML;
-        typingBody.innerHTML = ""; // Clear for typing effect
+        typingBody.innerHTML = ""; 
 
         function openEnvelope() {
-            // Trigger Warp
             isWarping = true; 
             envelope.classList.add('vanish');
             moon.classList.add('shifted');
 
             setTimeout(() => {
-                isWarping = false; // Stop Warp
+                isWarping = false; 
                 letter.classList.add('active');
 
-                // Type Letter
                 let i = 0;
                 let typing = setInterval(() => {
                     if (rawText.substring(i, i+4) === "<br>") {
@@ -471,12 +480,13 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             }, 1200);
         }
 
-        // 3. Finish Reading
-        const outro = document.getElementById('outro');
-        const outroText = document.getElementById('outroText');
+        // Finish Reading -> Final Moon Scene
+        const finalScene = document.getElementById('final-scene');
+        const finalMoon = document.getElementById('finalMoon');
+        const finalQuote = document.getElementById('finalQuote');
 
         function finishReading() {
-            letter.classList.add('implode'); // Supernova effect
+            letter.classList.add('implode'); 
             
             setTimeout(() => {
                 // Flash White
@@ -486,11 +496,17 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             }, 1200);
 
             setTimeout(() => {
-                // Fade to Black
+                // Fade to Black & Show Final Scene
                 document.body.style.transition = "background 2s";
                 document.body.style.background = "black";
-                outro.classList.add('active');
-                setTimeout(() => { scrambleText(outroText, "YOU ARE MY FOREVER"); }, 1000);
+                finalScene.style.opacity = 1;
+                
+                // Rise the Moon
+                setTimeout(() => { finalMoon.classList.add('rise'); }, 500);
+                
+                // Show Quote
+                setTimeout(() => { finalQuote.classList.add('show'); }, 3000);
+
             }, 1500);
         }
 
