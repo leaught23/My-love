@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stellar Transmission</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Dancing+Script:wght@400;700&family=Montserrat:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Dancing+Script:wght@400;700&family=Montserrat:wght@300;400;600&family=Space+Mono&display=swap');
 
         /* --- CORE UNIVERSE --- */
         body, html {
@@ -20,6 +20,14 @@
             z-index: 0;
         }
         
+        /* Cinematic Vignette */
+        #vignette {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%);
+            z-index: 2; pointer-events: none;
+            transition: opacity 2s ease;
+        }
+
         canvas { position: absolute; top: 0; left: 0; z-index: 1; }
 
         /* --- CUSTOM CURSOR --- */
@@ -32,7 +40,7 @@
         .cursor-ring {
             width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.3);
             border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998;
-            transition: width 0.3s, height 0.3s, opacity 0.3s;
+            transition: width 0.3s, height 0.3s, opacity 0.3s, transform 0.1s ease-out;
             transform: translate(-50%, -50%);
         }
 
@@ -47,12 +55,21 @@
         }
         .overlay-screen.active { opacity: 1; pointer-events: all; }
 
+        /* Text Animations */
         .cinematic-text {
             font-family: 'Cinzel', serif; color: #a8c0ff; font-size: 1.8rem;
             letter-spacing: 6px; text-transform: uppercase; text-align: center;
             text-shadow: 0 0 20px rgba(168, 192, 255, 0.6);
             margin-bottom: 20px;
+            filter: blur(0px);
         }
+        .blur-in { animation: blurFocus 2.5s ease forwards; }
+        
+        @keyframes blurFocus {
+            0% { filter: blur(10px); opacity: 0; letter-spacing: 12px; }
+            100% { filter: blur(0px); opacity: 1; letter-spacing: 6px; }
+        }
+
         .pulse-hint {
             font-size: 0.75rem; color: rgba(255,255,255,0.5); letter-spacing: 3px;
             text-transform: uppercase; animation: fadePulse 3s infinite;
@@ -64,6 +81,7 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 140px; height: 140px; z-index: 5;
             transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+            will-change: transform, top;
         }
         .moon-wrapper.shifted { top: 15%; transform: translate(-50%, -50%) scale(0.6); }
 
@@ -84,45 +102,64 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 200; pointer-events: none; opacity: 0;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: #000; transition: opacity 2s ease;
+            background: transparent; transition: opacity 2s ease;
         }
         
         .final-moon {
-            width: 200px; height: 200px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #fdfdfd, #c5c5c5 40%, #545454 100%);
-            box-shadow: 0 0 80px rgba(255, 255, 255, 0.15), inset -20px -20px 60px rgba(0,0,0,0.8);
+            width: 220px; height: 220px; border-radius: 50%;
+            /* Enhanced Moon Texture for Rotation */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+            background-color: #e0e0e0;
+            background-size: 200% 100%; /* Allows rotation */
+            box-shadow: 0 0 80px rgba(255, 255, 255, 0.2), inset -30px -30px 60px rgba(0,0,0,0.9);
             transform: translateY(100px) scale(0.8);
             opacity: 0;
-            transition: all 4s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 4s cubic-bezier(0.22, 1, 0.36, 1), opacity 4s ease;
             position: relative;
-        }
-        /* Moon Texture (Craters) */
-        .final-moon::before {
-            content:''; position: absolute; top:0; left:0; width:100%; height:100%; border-radius:50%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.3'/%3E%3C/svg%3E");
-            opacity: 0.6; mix-blend-mode: multiply;
+            will-change: transform, opacity, background-position;
         }
         
+        /* Bloom Effect */
         .final-moon.rise {
             transform: translateY(0) scale(1);
             opacity: 1;
-            box-shadow: 0 0 100px rgba(255, 255, 255, 0.3), inset -10px -10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 0 120px rgba(255, 255, 255, 0.4), inset -10px -10px 40px rgba(0,0,0,0.6);
+            animation: moonRotate 60s linear infinite; /* Slow Rotation */
+        }
+
+        @keyframes moonRotate {
+            from { background-position: 0% 0%; }
+            to { background-position: 200% 0%; }
         }
 
         .final-quote {
-            font-family: 'Dancing Script', cursive; font-size: 1.5rem; color: #dbe4eb;
-            margin-top: 50px; opacity: 0; transform: translateY(20px);
-            text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-            transition: all 2s ease; transition-delay: 2s; /* Wait for moon to rise */
+            font-family: 'Dancing Script', cursive; font-size: 1.6rem; color: #dbe4eb;
+            margin-top: 60px; opacity: 0; transform: translateY(20px);
+            text-align: center; text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transition: all 2s ease; transition-delay: 2s; 
         }
-        .final-quote.show { opacity: 0.9; transform: translateY(0); }
+        .final-quote.show { opacity: 1; transform: translateY(0); }
 
+        /* Final Blackout Overlay */
+        #final-blackout {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 300; pointer-events: none; opacity: 0;
+            transition: opacity 3s ease;
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        .transmission-end {
+            color: #333; font-family: 'Space Mono', monospace; font-size: 0.8rem;
+            letter-spacing: 4px; text-transform: uppercase;
+            opacity: 0; transition: opacity 2s ease 2s;
+        }
 
         /* --- THE FLOATING ENVELOPE --- */
         .envelope-container {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 20; cursor: pointer;
             transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            will-change: transform;
         }
         .envelope-container:hover { transform: translate(-50%, -55%) scale(1.05); }
         .envelope-container:hover .envelope-body { box-shadow: 0 0 50px rgba(168, 192, 255, 0.3); }
@@ -224,13 +261,14 @@
     </audio>
 
     <div id="deep-space"></div>
+    <div id="vignette"></div>
     <canvas id="starCanvas"></canvas>
     
     <div class="cursor-dot" id="cursorDot"></div>
     <div class="cursor-ring" id="cursorRing"></div>
 
     <div id="intro" class="overlay-screen active">
-        <div class="cinematic-text" id="introText"></div>
+        <div class="cinematic-text blur-in" id="introText"></div>
         <div class="pulse-hint">Click to Align the Stars</div>
     </div>
 
@@ -257,7 +295,7 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
                 </div>
 
                 <div style="width:100%; border-radius:12px; overflow:hidden; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/51lPx6Z6algW9mQ5v8mR8s?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/3xKsf9chAy55EfNjq5uyV2?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 </div>
 
                 <button class="finish-btn" onclick="finishReading()">I Have Finished Reading</button>
@@ -272,10 +310,14 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         </div>
     </div>
 
+    <div id="final-blackout">
+        <div class="transmission-end">Transmission Complete</div>
+    </div>
+
     <script>
         /* --- CONFIGURATION --- */
-        const STAR_COUNT = 350;
-        const CONNECT_DISTANCE = 100;
+        const STAR_COUNT = 400;
+        const CONNECT_DISTANCE = 110;
         
         /* --- SETUP CANVAS --- */
         const canvas = document.getElementById('starCanvas');
@@ -284,7 +326,10 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         let stars = [];
         let orbs = [];
         let mouse = { x: -999, y: -999 };
-        let isWarping = false;
+        
+        // Scene States
+        let currentScene = 'intro'; // intro, warp, main, outro
+        let speed = 0.2; // Base speed
 
         /* --- MOUSE TRACKING --- */
         const cursorDot = document.getElementById('cursorDot');
@@ -321,20 +366,22 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
                 this.y = Math.random() * height - height/2;
                 this.z = width; 
                 this.size = Math.random() * 2;
-                this.fill = Math.random() > 0.9 ? "#a8c0ff" : "#ffffff";
+                this.fill = Math.random() > 0.85 ? "#a8c0ff" : "#ffffff";
             }
-            update(speed) {
-                this.z -= speed;
+            update(currentSpeed) {
+                this.z -= currentSpeed;
                 if (this.z <= 1) this.reset();
             }
             draw() {
+                // Perspective Logic
                 let x = (this.x / this.z) * width/2 + width/2;
                 let y = (this.y / this.z) * height/2 + height/2;
                 let r = (1 - this.z / width) * 3 * this.size;
 
                 if (x < 0 || x > width || y < 0 || y > height) return;
 
-                if (isWarping) {
+                if (currentScene === 'warp') {
+                    // Warp Line Effect
                     let prevZ = this.z + 50;
                     let prevX = (this.x / prevZ) * width/2 + width/2;
                     let prevY = (this.y / prevZ) * height/2 + height/2;
@@ -345,28 +392,32 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
                     ctx.lineTo(x, y);
                     ctx.stroke();
                 } else {
+                    // Normal Star
                     ctx.beginPath();
                     ctx.fillStyle = this.fill;
                     ctx.globalAlpha = (1 - this.z / width);
                     ctx.arc(x, y, r, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    let dx = x - mouse.x;
-                    let dy = y - mouse.y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < CONNECT_DISTANCE) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(168, 192, 255, ${1 - dist/CONNECT_DISTANCE})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.stroke();
+                    // Constellation Lines (only in Main scene)
+                    if (currentScene === 'main') {
+                        let dx = x - mouse.x;
+                        let dy = y - mouse.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < CONNECT_DISTANCE) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(168, 192, 255, ${1 - dist/CONNECT_DISTANCE})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(mouse.x, mouse.y);
+                            ctx.stroke();
+                        }
                     }
                 }
             }
         }
 
-        /* --- ORB SYSTEM --- */
+        /* --- ORB SYSTEM (Particles) --- */
         class Orb {
             constructor() {
                 this.x = Math.random() * width;
@@ -374,6 +425,7 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
                 this.speed = Math.random() * 0.5 + 0.2;
                 this.radius = Math.random() * 2 + 1;
                 this.angle = Math.random() * Math.PI * 2;
+                this.color = "rgba(255, 223, 186, 0.6)"; // Default warm
             }
             update() {
                 this.y -= this.speed;
@@ -383,7 +435,8 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             }
             draw() {
                 ctx.beginPath();
-                ctx.fillStyle = "rgba(255, 223, 186, 0.6)";
+                // If Outro, make them blue/white dust
+                ctx.fillStyle = currentScene === 'outro' ? "rgba(168, 192, 255, 0.4)" : this.color;
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fill();
             }
@@ -392,26 +445,34 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         function initStars() {
             stars = []; orbs = [];
             for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
-            for (let i = 0; i < 30; i++) orbs.push(new Orb());
+            for (let i = 0; i < 40; i++) orbs.push(new Orb());
         }
         initStars();
 
         /* --- ANIMATION LOOP --- */
-        let speed = 0.5;
         function animate() {
             ctx.clearRect(0, 0, width, height);
             
-            if (isWarping) {
-                if(speed < 40) speed += 0.5;
-            } else {
+            // Speed Control State Machine
+            if (currentScene === 'intro') {
+                speed = 0.8; // Slow zoom forward
+            } else if (currentScene === 'warp') {
+                if(speed < 40) speed += 1.5;
+            } else if (currentScene === 'main') {
                 if(speed > 0.5) speed -= 1;
-                if(speed < 0.5) speed = 0.5;
+                if(speed < 0.5) speed = 0.5; // Cruising speed
+            } else if (currentScene === 'outro') {
+                speed = 0.1; // Very slow drift
             }
 
+            // Draw Elements
             stars.forEach(star => { star.update(speed); star.draw(); });
-            if (!isWarping && speed < 2) {
+            
+            // Orbs visible in Main and Outro
+            if (currentScene === 'main' || currentScene === 'outro') {
                 orbs.forEach(orb => { orb.update(); orb.draw(); });
             }
+
             requestAnimationFrame(animate);
         }
         animate();
@@ -422,6 +483,7 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         const introText = document.getElementById('introText');
         const mainScene = document.getElementById('main-scene');
         const bgMusic = document.getElementById('bgMusic');
+        const vignette = document.getElementById('vignette');
 
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         function scrambleText(element, finalString) {
@@ -436,13 +498,28 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             }, 30);
         }
 
-        setTimeout(() => { scrambleText(introText, "CONNECTING..."); }, 500);
+        setTimeout(() => { scrambleText(introText, "CONNECTING..."); }, 200);
 
         intro.addEventListener('click', () => {
+            currentScene = 'main'; // Technically moves to main, logic handled below
             intro.style.opacity = 0;
+            vignette.style.opacity = 0; // Remove vignette for clarity
+            
             setTimeout(() => { intro.style.display = 'none'; }, 1500);
-            bgMusic.volume = 0.3;
+            
+            // Smooth Audio Fade In
+            bgMusic.volume = 0;
             bgMusic.play().catch(() => console.log("Audio requires interaction"));
+            let vol = 0;
+            let fadeInterval = setInterval(() => {
+                if (vol < 0.4) {
+                    vol += 0.01;
+                    bgMusic.volume = vol;
+                } else {
+                    clearInterval(fadeInterval);
+                }
+            }, 100);
+
             mainScene.style.opacity = 1;
         });
 
@@ -457,12 +534,12 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         typingBody.innerHTML = ""; 
 
         function openEnvelope() {
-            isWarping = true; 
+            currentScene = 'warp'; // Triggers canvas warp
             envelope.classList.add('vanish');
             moon.classList.add('shifted');
 
             setTimeout(() => {
-                isWarping = false; 
+                currentScene = 'main'; // Back to normal speed
                 letter.classList.add('active');
 
                 let i = 0;
@@ -484,9 +561,12 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
         const finalScene = document.getElementById('final-scene');
         const finalMoon = document.getElementById('finalMoon');
         const finalQuote = document.getElementById('finalQuote');
+        const blackout = document.getElementById('final-blackout');
+        const endText = document.querySelector('.transmission-end');
 
         function finishReading() {
             letter.classList.add('implode'); 
+            currentScene = 'outro'; // Slows down stars
             
             setTimeout(() => {
                 // Flash White
@@ -498,7 +578,7 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
             setTimeout(() => {
                 // Fade to Black & Show Final Scene
                 document.body.style.transition = "background 2s";
-                document.body.style.background = "black";
+                document.body.style.background = "transparent"; // Canvas is black
                 finalScene.style.opacity = 1;
                 
                 // Rise the Moon
@@ -506,6 +586,18 @@ My Moon,<br><br>As this year slowly comes to an end, I just wanted to leave you 
                 
                 // Show Quote
                 setTimeout(() => { finalQuote.classList.add('show'); }, 3000);
+                
+                // Final Blackout
+                setTimeout(() => { 
+                    blackout.style.opacity = 1; 
+                    endText.style.opacity = 1;
+                    // Fade out audio
+                    let vol = bgMusic.volume;
+                    let fadeOut = setInterval(() => {
+                        if (vol > 0) { vol -= 0.02; bgMusic.volume = Math.max(0, vol); }
+                        else clearInterval(fadeOut);
+                    }, 200);
+                }, 9000);
 
             }, 1500);
         }
